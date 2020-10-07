@@ -6,19 +6,18 @@ class Fringe:
 
     def isEmpty(self):
         return len(self.container) == 0
-
 class FringeBFS(Fringe):
 
-    def push(self, node):
-        self.container.append(node)
+    def push(self, problem, accessPath):
+        self.container.append(Node(problem, accessPath))
 
     def pop(self):
         return self.container.pop(0)
         
 class FringeDFS(Fringe):
 
-    def push(self, node):
-        self.container.insert(0, node)
+    def push(self, problem, accessPath):
+        self.container.insert(0, Node(problem, accessPath))
 
     def pop(self):
         return self.container.pop()
@@ -33,7 +32,8 @@ class FringeAstar(Fringe):
     def isInFringe(self, node):
         return node in self.container
 
-    def push(self, node):
+    def push(self, problem, accessPath, accessCost = 0, totalCost = 0):
+        node = aStarNode(problem, accessPath, accessCost, totalCost)
         if self.isInFringe(node):
             self.stateDict[node.state].marked = True
             
@@ -46,17 +46,16 @@ class FringeAstar(Fringe):
             if not poppedNode.marked:
                 return poppedNode
 
-
 class Node:
     def __init__(self, state, accessPath):
         self.state = state
         self.accessPath = accessPath
-        self.marked = None
 
 class aStarNode(Node):
-    def __init__(self, state, accessPath, accessCost = 0, totalCost = 0):
+    def __init__(self, state, accessPath, accessCost, totalCost):
         Node.__init__(self, state, accessPath)
         self.accessCost = accessCost
+        self.totalCost = totalCost
         self.marked = False
     
     def __hash__(self):
@@ -66,4 +65,4 @@ class aStarNode(Node):
         return self.state == other.state
         
     def __lt__(self, other):
-        return self.accessCost < other.accessCost
+        return self.totalCost < other.totalCost

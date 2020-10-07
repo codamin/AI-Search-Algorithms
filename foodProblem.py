@@ -13,10 +13,10 @@ class FoodSearchProblem:
             # self.map = np.zeros((dim_x, dim_y))
             foods = []
             for _ in range(food_num):
-                food_x, food_y, count = read_line()
-                foods.append((food_x, food_y, count))
+                food_y, food_x, count = read_line()
+                foods.append((food_y, food_x, count))
                 # self.map[food_x][food_y] = count
-            self.startState = State([(s_x, s_y)], foods)
+            self.startState = State([(s_y, s_x)], foods)
 
     def getCost(self):
         return 1
@@ -91,14 +91,15 @@ class FoodSearchProblem:
             if suc is not None:
                 successors.append((suc, action, self.getCost()))
         return successors
+    
+    def h1(self, state):
+        ## return total foods remaining
+        return sum([count for y,x,count in state.foods])
 
-    def printState(self, state):
-        map = np.zeros((self.dim_x, self.dim_y))
-        for food in state.foods:
-            map[food[0]][food[1]] = food[2]
-        for pos in state.snake:
-            map[pos[0]][pos[1]] = '9'
-        print(map)
+    def h2(self, state):
+        ## return manhatan distance
+        return sum(list(map(lambda f : min(self.dim_x - f[1], f[1]) +
+            min(self.dim_y - f[0], f[0]), state.foods)))
 
 class State:
     def __init__(self, snake, foods):

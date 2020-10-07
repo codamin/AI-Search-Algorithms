@@ -9,31 +9,61 @@ def getFringe(searchType):
     elif searchType == 'aStar':
         return FringeAstar()
 
-def generalSearch(problem, searchType, depthLimit = None, heuristic = lambda x:0):
+def solution(node, seenStates, distinctStates):
+    sol = {}
+    sol['total number of explored states'] = seenStates
+    sol['total number of distinct found states'] = distinctStates
+    state, parent, action, depth, g_n, f_n = node
+    sol['solution depth'] = depth
+    path = action
+    while(parent[1] is not None):
+        path = parent[2] + '-' + path
+        parent = parent[1]
+    sol['path'] = path
+    return sol
+
+def getHeuristic(problem, name):
+    if name == 'one':
+        return problem.h1
+    if name == 'two':
+        return problem.h2
+    return lambda s : 0
+
+def generalSearch(problem, searchType, depthLimit = None, heuristic = 'two'):
     fringe = getFringe(searchType)    
     explored = set()
-    fringe.push(problem.startState, [], g_n = 0, f_n = 0)
+    fringe.push(problem.startState, parent = None, action = None, g_n = 0, f_n = 0, depth = 0)
+
+    distinctStates = 0
+    h_n = getHeuristic(problem, heuristic)
+
+    total_set_time = 0
 
     while not fringe.isEmpty():
-        state, path, g_n, _ = fringe.pop()
+        node = fringe.pop()
+        state, parent, action, depth, g_n, f_n = node
         # Only for IDS search
-        if searchType == 'ids' and len(path) == depthLimit:
+        if searchType == 'ids' and depth == depthLimit:
             continue
 
         if problem.isGoalState(state):
-            return(path)
+            return(solution(node, len(explored), distinctStates))
+        # if state in explored:
+        #         continue
 
-        if state in explored:
-            continue
         explored.add(state)
 
         for successor, action, cost in problem.getSuccessors(state):
-            child_path = path + [action]
             child_g_n = g_n + cost
-            child_f_n = g_n + heuristic(state)
-            # print(child_path, "@@@@@@@@@@@@@@@@@@@@@@@@")
-            # if successor not in explored:
-            fringe.push(successor, child_path, child_g_n, child_f_n)
+            child_f_n = g_n + h_n(state)
+            child_action = action
+            child_depth = depth + 1
+            
+            if successor in explored:
+                continue
+
+            if fringe.push(successor, node, child_action, child_depth, child_g_n, child_f_n):
+                distinctStates += 1
 
 def ids(problem, maxDepth):
     for _ in range(maxDepth):

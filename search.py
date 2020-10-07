@@ -11,33 +11,29 @@ def getFringe(searchType):
 
 def generalSearch(problem, searchType, depthLimit = None, heuristic = lambda x:0):
     fringe = getFringe(searchType)    
-    visited = set()
-    fringe.push(problem.startState, [])
+    explored = set()
+    fringe.push(problem.startState, [], g_n = 0, f_n = 0)
 
     while not fringe.isEmpty():
-        selectedNode = fringe.pop()
-        state, prevAccessPath = selectedNode[:2]
-        # print(prevAccessPath)
-        # Only for A* search
-        if searchType == 'aStar':
-            prevAccessCost = selectedNode[2]
+        state, path, g_n, _ = fringe.pop()
         # Only for IDS search
-        if searchType == 'ids' and len(prevAccessPath) == depthLimit:
+        if searchType == 'ids' and len(path) == depthLimit:
             continue
-        if problem.isGoalState(state):
-            return(prevAccessPath)
-        if state in visited:
-            continue
-        visited.add(state)
 
-        for successor, action, newCost in problem.getSuccessors(state):
-            newNodeAccessPath = prevAccessPath + [action]
-            if searchType == 'aStar':
-                g_n = prevAccessCost + newCost
-                f_n = g_n + heuristic(state)
-                fringe.push(successor, newNodeAccessPath, g_n, f_n)
-            else:
-                fringe.push(successor, newNodeAccessPath)
+        if problem.isGoalState(state):
+            return(path)
+
+        if state in explored:
+            continue
+        explored.add(state)
+
+        for successor, action, cost in problem.getSuccessors(state):
+            child_path = path + [action]
+            child_g_n = g_n + cost
+            child_f_n = g_n + heuristic(state)
+            # print(child_path, "@@@@@@@@@@@@@@@@@@@@@@@@")
+            # if successor not in explored:
+            fringe.push(successor, child_path, child_g_n, child_f_n)
 
 def ids(problem, maxDepth):
     for _ in range(maxDepth):

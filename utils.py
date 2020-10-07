@@ -7,16 +7,16 @@ class Fringe:
     def isEmpty(self):
         return len(self.container) == 0
 class FringeBFS(Fringe):
-    def push(self, state, accessPath):
-        node = (state, accessPath)
+    def push(self, state, accessPath, g_n, f_n):
+        node = (state, accessPath, g_n, f_n)
         self.container.append(node)
 
     def pop(self):
         return self.container.pop(0)
         
 class FringeDFS(Fringe):
-    def push(self, state, accessPath):
-        node = (state, accessPath)
+    def push(self, state, accessPath, g_n, f_n):
+        node = (state, accessPath, g_n, f_n)
         self.container.insert(0, node)
 
     def pop(self):
@@ -33,12 +33,12 @@ class FringeAstar(Fringe):
     def mustUpdate(self, state, totalCost):
         return state in self.queueNodes and  totalCost < self.queueNodes[state][0]
 
-    def push(self, state, accessPath, accessCost = 0, totalCost = 0):
-        if self.mustUpdate(state, totalCost):
+    def push(self, state, accessPath, g_n = 0, f_n = 0):
+        if self.mustUpdate(state, f_n):
             self.queueNodes[state][-1] = True
 
         self.counter += 1
-        node = [totalCost, self.counter, state, accessPath, accessCost, False]
+        node = [f_n, self.counter, state, accessPath, g_n, False]
         self.queueNodes[state] = node
         heapq.heappush(self.container, node)
  
@@ -46,4 +46,4 @@ class FringeAstar(Fringe):
         while(self.container):
             poppedNode = heapq.heappop(self.container)
             if not poppedNode[-1]:
-                return poppedNode[2:5]
+                return poppedNode[2:5] + [poppedNode[0]]

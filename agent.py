@@ -7,9 +7,7 @@ class Agent:
     
     def search(self, **kargs):
         tic = time.time()
-        if 'heuristic' in kargs:
-            actions = self.searchFunction(self.problem, kargs['searchType'], kargs['heuristic'])
-        elif 'searchType' in kargs:
+        if 'searchType' in kargs:
             actions = self.searchFunction(self.problem, kargs['searchType'])
         elif 'maxDepth' in kargs:
             actions = self.searchFunction(self.problem, kargs['maxDepth'])

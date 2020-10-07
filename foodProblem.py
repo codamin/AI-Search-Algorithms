@@ -7,7 +7,7 @@ class FoodSearchProblem:
 
         with open(filename) as file:
             read_line = lambda : list(map(int, file.readline().split(',')))
-            self.dim_x, self.dim_y = read_line()
+            self.dim_y, self.dim_x = read_line()
             s_x, s_y = read_line()
             food_num = read_line()[0]
             # self.map = np.zeros((dim_x, dim_y))
@@ -57,6 +57,9 @@ class FoodSearchProblem:
         
         if newHead in snake:
             return None
+
+        assert(newHead[0] >= 0 and newHead[0] <= self.dim_y)
+        assert(newHead[1] >= 0 and newHead[1] <= self.dim_x)
 
         snake.insert(0, newHead)
 

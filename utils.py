@@ -7,17 +7,17 @@ class Fringe:
     def isEmpty(self):
         return len(self.container) == 0
 class FringeBFS(Fringe):
-
-    def push(self, problem, accessPath):
-        self.container.append(Node(problem, accessPath))
+    def push(self, state, accessPath):
+        node = (state, accessPath)
+        self.container.append(node)
 
     def pop(self):
         return self.container.pop(0)
         
 class FringeDFS(Fringe):
-
-    def push(self, problem, accessPath):
-        self.container.insert(0, Node(problem, accessPath))
+    def push(self, state, accessPath):
+        node = (state, accessPath)
+        self.container.insert(0, node)
 
     def pop(self):
         return self.container.pop()
@@ -27,42 +27,23 @@ class FringeAstar(Fringe):
     def __init__(self):
         Fringe.__init__(self)
         heapq.heapify(self.container)
-        self.stateDict = {}
+        self.queueNodes = {}
+        self.counter = 0
 
-    def isInFringe(self, node):
-        return node in self.container
+    def mustUpdate(self, state, totalCost):
+        return state in self.queueNodes and  totalCost < self.queueNodes[state][0]
 
-    def push(self, problem, accessPath, accessCost = 0, totalCost = 0):
-        node = aStarNode(problem, accessPath, accessCost, totalCost)
-        if self.isInFringe(node):
-            self.stateDict[node.state].marked = True
-            
-        self.stateDict[node.state] = node
+    def push(self, state, accessPath, accessCost = 0, totalCost = 0):
+        if self.mustUpdate(state, totalCost):
+            self.queueNodes[state][-1] = True
+
+        self.counter += 1
+        node = [totalCost, self.counter, state, accessPath, accessCost, False]
+        self.queueNodes[state] = node
         heapq.heappush(self.container, node)
  
     def pop(self):
         while(self.container):
             poppedNode = heapq.heappop(self.container)
-            if not poppedNode.marked:
-                return poppedNode
-
-class Node:
-    def __init__(self, state, accessPath):
-        self.state = state
-        self.accessPath = accessPath
-
-class aStarNode(Node):
-    def __init__(self, state, accessPath, accessCost, totalCost):
-        Node.__init__(self, state, accessPath)
-        self.accessCost = accessCost
-        self.totalCost = totalCost
-        self.marked = False
-    
-    def __hash__(self):
-        return hash(self.state)
-
-    def __eq__(self,other):
-        return self.state == other.state
-        
-    def __lt__(self, other):
-        return self.totalCost < other.totalCost
+            if not poppedNode[-1]:
+                return poppedNode[2:5]

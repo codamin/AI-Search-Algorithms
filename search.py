@@ -9,18 +9,18 @@ def getFringe(searchType):
     elif searchType == 'aStar':
         return FringeAstar()
 
-def generalSearch(problem, searchType, depthLimit = None, h_n = None):
+def generalSearch(problem, searchType, depthLimit = None, heuristic = lambda x:0):
     fringe = getFringe(searchType)    
     visited = set()
     fringe.push(problem.startState, [])
 
     while not fringe.isEmpty():
         selectedNode = fringe.pop()
-        state, prevAccessPath = selectedNode.state, selectedNode.accessPath
-        print(prevAccessPath)
+        state, prevAccessPath = selectedNode[:2]
+        # print(prevAccessPath)
         # Only for A* search
         if searchType == 'aStar':
-            prevAccessCost = selectedNode.accessCost
+            prevAccessCost = selectedNode[2]
         # Only for IDS search
         if searchType == 'ids' and len(prevAccessPath) == depthLimit:
             continue
@@ -34,7 +34,7 @@ def generalSearch(problem, searchType, depthLimit = None, h_n = None):
             newNodeAccessPath = prevAccessPath + [action]
             if searchType == 'aStar':
                 g_n = prevAccessCost + newCost
-                f_n = g_n + h_n(state)
+                f_n = g_n + heuristic(state)
                 fringe.push(successor, newNodeAccessPath, g_n, f_n)
             else:
                 fringe.push(successor, newNodeAccessPath)

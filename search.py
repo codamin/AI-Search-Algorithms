@@ -29,15 +29,13 @@ def getHeuristic(problem, name):
         return problem.h2
     return lambda s : 0
 
-def generalSearch(problem, searchType, depthLimit = None, heuristic = 'two'):
+def graphSearch(problem, searchType, depthLimit = None, heuristic = None):
     fringe = getFringe(searchType)    
     explored = set()
     fringe.push(problem.startState, parent = None, action = None, g_n = 0, f_n = 0, depth = 0)
 
     distinctStates = 0
     h_n = getHeuristic(problem, heuristic)
-
-    total_set_time = 0
 
     while not fringe.isEmpty():
         node = fringe.pop()
@@ -67,7 +65,7 @@ def generalSearch(problem, searchType, depthLimit = None, heuristic = 'two'):
 
 def ids(problem, maxDepth):
     for _ in range(maxDepth):
-        foundPath = generalSearch(problem, 'ids', maxDepth)
+        foundPath = graphSearch(problem, 'ids', maxDepth)
         if foundPath is not None:
             return foundPath
     return None

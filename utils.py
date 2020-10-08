@@ -43,13 +43,16 @@ class FringeAstar(Fringe):
         heapq.heapify(self.container)
         self.queueNodes = {}
         self.counter = 0
+    
 
     def mustUpdate(self, state, totalCost):
         return state in self.queueNodes and  totalCost < self.queueNodes[state][0]
 
     def push(self, state, parent, action, depth, g_n = 0, f_n = 0):
         didPush = True
-        if self.mustUpdate(state, f_n):
+        if state in self.queueNodes:
+            if f_n >= self.queueNodes[state][0]:
+                return False
             self.queueNodes[state][-1] = True
             didPush = False
 

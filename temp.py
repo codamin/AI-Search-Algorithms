@@ -1,14 +1,90 @@
-# x = State([(0, 0)] , [(3, 1, 1), (3, 2, 1), (1, 4, 2), (4, 3, 1)])
-# y = State([(0, 0)] , [(3, 1, 2), (3, 2, 1), (1, 4, 2), (4, 3, 1)])
-# n1 = aStarNode(x, [], 0, 10)
-# n2 = aStarNode(x, [], 0, 20)
-
-# print(hash(x))
 import heapq
-l = [[8,1,10], [7,5,10]]
-p = [1,2,3]
-# s = set()
-# s.add(tuple(p))
 
-heapq.heapify(l)
-print(heapq.heappop(l))
+class Fringe:
+    def __init__(self):
+        self.container = []
+        self.states = set()
+
+    def isEmpty(self):
+        return len(self.container) == 0
+
+class FringeBFS(Fringe):
+    def push(self, state, parent, action, depth, g_n, f_n):
+        node = (state, parent, action, depth, g_n, f_n)
+        if state in self.states:
+            return False      
+        self.container.append(node)
+        self.states.add(state)
+        return True
+
+    def pop(self):
+        poppedNode = self.container.pop(0)
+        self.states.remove(poppedNode[0])
+        return poppedNode
+        
+class FringeDFS(Fringe):
+    def push(self, state, parent, action, depth, g_n, f_n):
+        node = (state, parent, action, depth, g_n, f_n)
+        if state in self.states:
+            return False   
+        self.container.insert(0, node)
+        self.states.add(state)
+        return True
+
+    def pop(self):
+        poppedNode = self.container.pop()
+        self.states.remove(poppedNode[0])
+        return poppedNode
+
+
+class FringeAstar(Fringe):
+    def __init__(self):
+        Fringe.__init__(self)
+        heapq.heapify(self.container)
+        self.queueNodes = {}
+        self.counter = 0
+    
+
+    def mustUpdate(self, state, totalCost):
+        return state in self.queueNodes and  totalCost < self.queueNodes[state][0]
+
+    def push(self, state, parent, action, depth, g_n = 0, f_n = 0):
+        didPush = True
+        if state in self.queueNodes:
+            if f_n >= self.queueNodes[state][0]:
+                return False
+            self.queueNodes[state][-1] = True
+            didPush = False
+
+        self.counter += 1
+        node = [f_n, self.counter, state, parent, action, depth, g_n, False]
+        self.queueNodes[state] = node
+        heapq.heappush(self.container, node)
+        return didPush
+
+    def pop(self):
+        while(self.container):
+            poppedNode = heapq.heappop(self.container)
+            if not poppedNode[-1]:
+                return poppedNode[2:7] + [poppedNode[0]]
+
+
+class State:
+    def __init__(self, snake, foods):
+        self.snake = snake
+        self.foods = foods
+    
+    def __str__(self):
+        return("{} ## {}".format(self.snake, self.foods))
+
+    def __hash__(self):
+        return hash((tuple(self.snake))) +  hash(tuple(self.foods))
+
+    def __eq__(self,other):
+        return self.snake == other.snake and self.foods == other.foods
+
+s = State([1,2], [(4,5,6)])       
+f = FringeAstar()
+print(f.push(s, None, 'U', 0, 0, 1))
+print(f.push(s, None, 'U', 0, 0, 20))
+
